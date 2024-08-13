@@ -104,12 +104,18 @@ document.getElementById('receiptForm').addEventListener('submit', function(event
                 value: url
             });
 
-            // Show the receipt preview and enable PDF download
+            // Show the receipt preview
             document.getElementById('displayTenantName').textContent = tenantName;
             document.getElementById('displayReceiptDate').textContent = receiptDate;
             document.getElementById('displayAmountPaid').textContent = amountPaid;
             document.getElementById('displayOwnerSignature').textContent = ownerSignature;
             document.getElementById('receiptPreview').classList.remove('d-none');
+
+            // Update the downloadPdf button to open the PDF URL in a new tab
+            document.getElementById('downloadPdf').addEventListener('click', function() {
+                window.open(url, '_blank'); // Open the PDF URL in a new tab
+            });
+
         }).catch((error) => {
             console.error("Error getting download URL:", error);
         });
@@ -117,6 +123,7 @@ document.getElementById('receiptForm').addEventListener('submit', function(event
         console.error("Error uploading PDF:", error);
     });
 });
+
 
     </script>
 </body>
