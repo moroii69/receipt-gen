@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Receipt System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="text-center">Tenant Receipt System</h2>
+                <form id="receiptForm">
+                    <div class="form-group">
+                        <label for="tenantName">Tenant Name:</label>
+                        <input type="text" class="form-control" id="tenantName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptDate">Receipt Date:</label>
+                        <input type="date" class="form-control" id="receiptDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amountPaid">Amount Paid:</label>
+                        <input type="number" class="form-control" id="amountPaid" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerSignature">Owner's Signature:</label>
+                        <input type="text" class="form-control" id="ownerSignature" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Generate Receipt</button>
+                </form>
+
+                <div id="receiptPreview" class="mt-4 d-none">
+                    <h4 class="text-center">Receipt Preview</h4>
+                    <div id="receiptContent" class="border p-3">
+                        <p><strong>Tenant Name:</strong> <span id="displayTenantName"></span></p>
+                        <p><strong>Receipt Date:</strong> <span id="displayReceiptDate"></span></p>
+                        <p><strong>Amount Paid:</strong> <span id="displayAmountPaid"></span></p>
+                        <p><strong>Owner's Signature:</strong> <span id="displayOwnerSignature"></span></p>
+                        <canvas id="qrCode" class="d-block mx-auto my-3"></canvas>
+                    </div>
+                    <button id="downloadPdf" class="btn btn-success btn-block">Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK and Main JavaScript Code -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDl97Q7B4KpfKBEL6yuxercRBSp-6eKUmA",
+            authDomain: "flask-cors.firebaseapp.com",
+            projectId: "flask-cors",
+            storageBucket: "flask-cors.appspot.com",
+            messagingSenderId: "921038822101",
+            appId: "1:921038822101:web:2e9cecd15b1791a4de205c",
+            measurementId: "G-LT2CY3W7N9"
+        };
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+document.getElementById('receiptForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent form submission and page reload
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const tenantName = document.getElementById('tenantName').value;
+    const receiptDate = document.getElementById('receiptDate').value;
+    const amountPaid = document.getElementById('amountPaid').value;
+    const ownerSignature = document.getElementById('ownerSignature').value;
+
+    // Add content to PDF
+    doc.setFontSize(20);
+    doc.text("Receipt", 105, 20, null, null, "center");
+    doc.setFontSize(12);
+    doc.text(`Tenant Name: ${tenantName}`, 20, 40);
+    doc.text(`Receipt Date: ${receiptDate}`, 20, 50);
+    doc.text(`Amount Paid: ${amountPaid}`, 20, 60);
+    doc.text(`Owner's Signature: ${ownerSignature}`, 20, 70);
+
+    // Convert PDF to Blob
+    const pdfBlob = doc.output('blob');
+
+    // Upload to Firebase Storage
+    const pdfRef = ref(storage, `receipts/receipt-${Date.now()}.pdf`);
+    uploadBytes(pdfRef, pdfBlob).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+            console.log('File available at', url);
+
+            // Generate QR code with the Firebase URL
+            const qr = new QRious({
+                element: document.getElementById('qrCode'),
+                size: 150,
+                value: url
+            });
+
+            // Show the receipt preview and enable PDF download
+            document.getElementById('displayTenantName').textContent = tenantName;
+            document.getElementById('displayReceiptDate').textContent = receiptDate;
+            document.getElementById('displayAmountPaid').textContent = amountPaid;
+            document.getElementById('displayOwnerSignature').textContent = ownerSignature;
+            document.getElementById('receiptPreview').classList.remove('d-none');
+        }).catch((error) => {
+            console.error("Error getting download URL:", error);
+        });
+    }).catch((error) => {
+        console.error("Error uploading PDF:", error);
+    });
+});
+
+    </script>
+</body>
+</html>
