@@ -49,82 +49,164 @@
         </div>
     </div>
 
+    <!-- Loader -->
+    <div id="loader" class="d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
     <!-- Firebase SDK and Main JavaScript Code -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDl97Q7B4KpfKBEL6yuxercRBSp-6eKUmA",
-            authDomain: "flask-cors.firebaseapp.com",
-            projectId: "flask-cors",
-            storageBucket: "flask-cors.appspot.com",
-            messagingSenderId: "921038822101",
-            appId: "1:921038822101:web:2e9cecd15b1791a4de205c",
-            measurementId: "G-LT2CY3W7N9"
-        };
-        const app = initializeApp(firebaseConfig);
-        const storage = getStorage(app);
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDl97Q7B4KpfKBEL6yuxercRBSp-6eKUmA",
+        authDomain: "flask-cors.firebaseapp.com",
+        projectId: "flask-cors",
+        storageBucket: "flask-cors.appspot.com",
+        messagingSenderId: "921038822101",
+        appId: "1:921038822101:web:2e9cecd15b1791a4de205c",
+        measurementId: "G-LT2CY3W7N9"
+    };
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
-document.getElementById('receiptForm').addEventListener('submit', function(event) {
-    event.preventDefault();  // Prevent form submission and page reload
+    document.getElementById('receiptForm').addEventListener('submit', function(event) {
+        event.preventDefault();  // Prevent form submission and page reload
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+        // Show the loader
+        document.getElementById('loader').classList.remove('d-none');
 
-    const tenantName = document.getElementById('tenantName').value;
-    const receiptDate = document.getElementById('receiptDate').value;
-    const amountPaid = document.getElementById('amountPaid').value;
-    const ownerSignature = document.getElementById('ownerSignature').value;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4'); // Set to landscape orientation and A4 size
 
-    // Add content to PDF
-    doc.setFontSize(20);
-    doc.text("Receipt", 105, 20, null, null, "center");
-    doc.setFontSize(12);
-    doc.text(`Tenant Name: ${tenantName}`, 20, 40);
-    doc.text(`Receipt Date: ${receiptDate}`, 20, 50);
-    doc.text(`Amount Paid: ${amountPaid}`, 20, 60);
-    doc.text(`Owner's Signature: ${ownerSignature}`, 20, 70);
+        const tenantName = document.getElementById('tenantName').value;
+        const receiptDate = document.getElementById('receiptDate').value;
+        const amountPaid = document.getElementById('amountPaid').value;
+        const ownerSignature = document.getElementById('ownerSignature').value;
 
-    // Convert PDF to Blob
-    const pdfBlob = doc.output('blob');
+        // Page Dimensions
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
 
-    // Upload to Firebase Storage
-    const pdfRef = ref(storage, `receipts/receipt-${Date.now()}.pdf`);
-    uploadBytes(pdfRef, pdfBlob).then((snapshot) => {
-        getDownloadURL(snapshot.ref).then((url) => {
-            console.log('File available at', url);
+        // Define text lines and line height
+        const lines = [
+            `Tenant Name: ${tenantName}`,
+            `Receipt Date: ${receiptDate}`,
+            `Amount Paid: $${amountPaid}`,
+            `Owner's Signature: ${ownerSignature}`
+        ];
+        const lineHeight = 10; // Height of each line of text
+        const headerHeight = 20; // Space for header
+        const additionalTextHeight = 20; // Space for additional text
+        const footerHeight = 20; // Reduced footer space for date and time
 
-            // Generate QR code with the Firebase URL
-            const qr = new QRious({
-                element: document.getElementById('qrCode'),
-                size: 150,
-                value: url
-            });
+        // Calculate the total height of the receipt content
+        const totalContentHeight = (lines.length * lineHeight) + headerHeight + additionalTextHeight + footerHeight;
 
-            // Show the receipt preview
-            document.getElementById('displayTenantName').textContent = tenantName;
-            document.getElementById('displayReceiptDate').textContent = receiptDate;
-            document.getElementById('displayAmountPaid').textContent = amountPaid;
-            document.getElementById('displayOwnerSignature').textContent = ownerSignature;
-            document.getElementById('receiptPreview').classList.remove('d-none');
+        // Calculate the vertical position to center the content
+        const startY = (pageHeight - totalContentHeight) / 2;
 
-            // Update the downloadPdf button to open the PDF URL in a new tab
-            document.getElementById('downloadPdf').addEventListener('click', function() {
-                window.open(url, '_blank'); // Open the PDF URL in a new tab
-            });
+        // Draw Page Border
+        doc.setLineWidth(1);
+        doc.rect(10, 10, pageWidth - 20, pageHeight - 20); // A4 size landscape dimensions with some padding
 
-        }).catch((error) => {
-            console.error("Error getting download URL:", error);
+        // Header
+        doc.setFontSize(24);
+        doc.setFont("courier", "bold");
+        doc.text("RECEIPT", pageWidth / 2, startY + headerHeight / 2, { align: "center" });
+
+        // Receipt Details
+        doc.setFontSize(14);
+        doc.setFont("courier", "normal");
+        lines.forEach((line, index) => {
+            doc.text(line, pageWidth / 2, startY + headerHeight + (index * lineHeight) + (lineHeight / 2), { align: "center" });
         });
-    }).catch((error) => {
-        console.error("Error uploading PDF:", error);
+
+        // Additional Text
+        doc.setFontSize(12);
+        doc.setFont("courier", "italic");
+        doc.text("Thank you for your payment!", pageWidth / 2, startY + headerHeight + (lines.length * lineHeight) + additionalTextHeight / 2, { align: "center" });
+
+        // Footer
+        doc.setFontSize(10);
+        doc.setFont("courier", "italic");
+
+        // Date and Time of Receipt Generation
+        const currentDate = new Date();
+        const formattedDate = currentDate.toLocaleDateString('en-US', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+        const formattedTime = currentDate.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit'
+        });
+        // Set margin from the bottom to be more pronounced
+        const footerMargin = 15; // Increase margin from the bottom
+        doc.text(`Receipt Generated: ${formattedDate} ${formattedTime}`, pageWidth / 2, pageHeight - footerMargin, { align: "center" });
+
+        // Convert PDF to Blob
+        const pdfBlob = doc.output('blob');
+
+        // Upload to Firebase Storage
+        const pdfRef = ref(storage, `receipts/receipt-${Date.now()}.pdf`);
+        uploadBytes(pdfRef, pdfBlob).then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((url) => {
+                console.log('File available at', url);
+
+                // Generate QR code with the Firebase URL
+                const qr = new QRious({
+                    element: document.getElementById('qrCode'),
+                    size: 150,
+                    value: url
+                });
+
+                // Show the receipt preview
+                document.getElementById('displayTenantName').textContent = tenantName;
+                document.getElementById('displayReceiptDate').textContent = receiptDate;
+                document.getElementById('displayAmountPaid').textContent = amountPaid;
+                document.getElementById('displayOwnerSignature').textContent = ownerSignature;
+                document.getElementById('receiptPreview').classList.remove('d-none');
+
+                // Update the downloadPdf button to open the PDF URL in a new tab
+                document.getElementById('downloadPdf').addEventListener('click', function() {
+                    window.open(url, '_blank'); // Open the PDF URL in a new tab
+                });
+
+                // Hide the loader
+                document.getElementById('loader').classList.add('d-none');
+
+            }).catch((error) => {
+                console.error("Error getting download URL:", error);
+                // Hide the loader in case of an error
+                document.getElementById('loader').classList.add('d-none');
+            });
+        }).catch((error) => {
+            console.error("Error uploading PDF:", error);
+            // Hide the loader in case of an error
+            document.getElementById('loader').classList.add('d-none');
+        });
     });
-});
+</script>
 
 
-    </script>
+    <!-- Loader CSS -->
+    <style>
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+    </style>
 </body>
-</html>
+    </html>
