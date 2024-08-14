@@ -1,97 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- specify the character encoding for the document -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenant Receipt System</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABj0lEQVR4nO2VwUrDQBCG9yWqb9DePSkIveyAh14Ec9jVi2QOPof2abx7KkJt00KCVqF489CTJLlZe3YlpVuWGLBNmo2t88MPYQd25tuZ3TBGIpH+nzw/9IZByM213ui95gXh7bqxRP3H6Njzow6zpUEQqcSeH3aHQdwc+rEz8KNYr68cC+Jm8q3XrQNs2owAVhR1IKARKiZ9gs3Tu5WcdeJZcWZLWwcAF1d7ILHNhfvMBc7KusRc4Awkjrhwb5Kcmyleug4XOAWJSrssADByzHOe41nh4kHil7mxCbDu2Pw2QpDKM8+dFyJpYfrkKwBQXODHiXNZy3H62M7a0NYIgQkh8XptAC7wJb1R/eBw7rIA6ov9MyBGOTrgfv4VAC5wmgPgZyt1grINGbkJACo228QIEYCsuANPb0dWDATAqAOKRkjSJcbK336gH5ncsR/Z/YOnJpPJ0p1uv3Dstd5Sap8vPW60ygMwi9AuGlNG8doEsLMd6HT7qVnuFY6NGxbvwNa/QkAAaK8DJBKJbYW+AX7aIYn4KzT3AAAAAElFTkSuQmCC">
-
     
+    <!-- set the viewport to ensure the page is responsive on different devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- set the title of the page -->
+    <title>Tenant Receipt System</title>
+    
+    <!-- link to the Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <!-- link to the custom stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- set the favicon for the page -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABj0lEQVR4nO2VwUrDQBCG9yWqb9DePSkIveyAh14Ec9jVi2QOPof2abx7KkJt00KCVqF489CTJLlZe3YlpVuWGLBNmo2t88MPYQd25tuZ3TBGIpH+nzw/9IZByM213ui95gXh7bqxRP3H6Njzow6zpUEQqcSeH3aHQdwc+rEz8KNYr68cC+Jm8q3XrQNs2owAVhR1IKARKiZ9gs3Tu5WcdeJZcWZLWwcAF1d7ILHNhfvMBc7KusRc4Awkjrhwb5Kcmyleug4XOAWJSrssADByzHOe41nh4kHil7mxCbDu2Pw2QpDKM8+dFyJpYfrkKwBQXODHiXNZy3H62M7a0NYIgQkh8XptAC7wJb1R/eBw7rIA6ov9MyBGOTrgfv4VAC5wmgPgZyt1grINGbkJACo228QIEYCsuANPb0dWDATAqAOKRkjSJcbK336gH5ncsR/Z/YOnJpPJ0p1uv3Dstd5Sap8vPW60ygMwi9AuGlNG8doEsLMd6HT7qVnuFY6NGxbvwNa/QkAAaK8DJBKJbYW+AX7aIYn4KzT3AAAAAElFTkSuQmCC">
+    
+    <!-- include the jsPDF library for generating PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- include the QRious library for generating QR codes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    
+    <!-- include the Signature Pad library for capturing signatures -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.3.4/signature_pad.min.js"></script>
     <style>
-        /* Ensure the body takes full height */
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
+    /* set the height of the html and body to 100% and remove default margin */
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
 
-        /* Main content area should push footer to bottom */
-        .container {
-            padding-bottom: 60px; /* Adjust according to the footer height */
-        }
+    /* add padding to the bottom of the container to accommodate for fixed footer */
+    .container {
+        padding-bottom: 60px; 
+    }
 
-        /* Fixed footer styling */
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #343a40; /* Dark background color */
-            color: #ffffff; /* White text color */
-            text-align: center;
-            padding: 10px 0;
-        }
+    /* style for the footer: fixed at the bottom of the page */
+    footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #343a40; /* dark background color */
+        color: #ffffff; /* white text color */
+        text-align: center;
+        padding: 10px 0;
+    }
 
-        /* Loader styling */
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            display: none; /* Initially hidden */
-        }
+    /* style for the loader overlay: covers the entire page */
+    #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8); /* semi-transparent white background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000; /* ensure it appears above other content */
+        display: none; /* hidden by default */
+    }
 
-        .modal-content {
-            position: relative;
-        }
+    /* style for modal content: relative positioning */
+    .modal-content {
+        position: relative;
+    }
 
-        .modal-body {
-            position: relative;
-        }
+    /* style for modal body: relative positioning */
+    .modal-body {
+        position: relative;
+    }
 
-        #signatureCanvas {
-            border: 1px solid #ddd;
-        }
+    /* style for the signature canvas: border around it */
+    #signatureCanvas {
+        border: 1px solid #ddd; /* light gray border */
+    }
 
-        .signature-label {
-            margin-bottom: 15px;
-            text-align: center;
-        }
+    /* style for the signature label: centered text with margin */
+    .signature-label {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
     </style>
 </head>
 <body>
+    <!-- container to hold the form and receipt preview -->
     <div class="container mt-5">
         <div class="card">
             <div class="card-body">
+                <!-- heading for the receipt system -->
                 <h2 class="text-center">Tenant Receipt System</h2>
+                <!-- form to input receipt details -->
                 <form id="receiptForm">
+                    <!-- input field for tenant's name -->
                     <div class="form-group">
                         <label for="tenantName">Tenant Name:</label>
                         <input type="text" class="form-control" id="tenantName" required>
                     </div>
+                    <!-- input field for receipt date -->
                     <div class="form-group">
                         <label for="receiptDate">Receipt Date:</label>
                         <input type="date" class="form-control" id="receiptDate" required>
                     </div>
+                    <!-- input field for amount paid -->
                     <div class="form-group">
                         <label for="amountPaid">Amount Paid:</label>
                         <input type="number" class="form-control" id="amountPaid" required>
                     </div>
+                    <!-- section for owner's signature -->
                     <div class="form-group">
                         <label for="ownerSignature">Owner's Signature:</label>
+                        <!-- hidden input to store signature -->
                         <input type="hidden" class="form-control" id="ownerSignature" required>
+                        <!-- button to open modal for adding signature -->
                         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#signatureModal">Add Signature</button>
                     </div>
+                    <!-- dropdown for selecting payment mode -->
                     <div class="form-group">
                         <label for="paymentMode">Payment Mode:</label>
                         <select class="form-control" id="paymentMode" required>
@@ -101,175 +131,230 @@
                             <option value="Online Transfer">Online Transfer</option>
                         </select>
                     </div>
+                    <!-- submit button to generate receipt -->
                     <button type="submit" class="btn btn-primary btn-block">Generate Receipt</button>
                 </form>
 
+                <!-- section to preview the receipt -->
                 <div id="receiptPreview" class="mt-4 d-none">
                     <h4 class="text-center">Receipt Preview</h4>
                     <div id="receiptContent" class="border p-3">
+                        <!-- displaying tenant's name -->
                         <p><strong>Tenant Name:</strong> <span id="displayTenantName"></span></p>
+                        <!-- displaying receipt date -->
                         <p><strong>Receipt Date:</strong> <span id="displayReceiptDate"></span></p>
+                        <!-- displaying amount paid -->
                         <p><strong>Amount Paid:</strong> <span id="displayAmountPaid"></span></p>
+                        <!-- displaying owner's signature -->
                         <p><strong>Owner's Signature:</strong> <span id="displayOwnerSignature"></span></p>
+                        <!-- displaying payment mode -->
                         <p><strong>Payment Mode:</strong> <span id="displayPaymentMode"></span></p>
+                        <!-- canvas for QR code -->
                         <canvas id="qrCode" class="d-block mx-auto my-3"></canvas>
                     </div>
+                    <!-- button to download receipt as PDF -->
                     <button id="downloadPdf" class="btn btn-success btn-block">Download PDF</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Loader -->
+    <!-- loader to indicate processing state -->
     <div id="loader">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- footer with contact information -->
     <footer>
         <p>For any inquiries, please contact us at <a href="mailto:ufraansiddiqui30@gmail.com" class="text-white">ufraansiddiqui30@gmail.com</a></p>
     </footer>
 
-    <!-- Signature Modal -->
+    <!-- modal for adding owner's signature -->
     <div class="modal fade" id="signatureModal" tabindex="-1" role="dialog" aria-labelledby="signatureModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
+                    <!-- modal title -->
                     <h5 class="modal-title" id="signatureModalLabel">Owner's Signature</h5>
+                    <!-- button to close modal -->
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
+                    <!-- label for signature input -->
                     <label class="signature-label">Please provide your signature below:</label>
+                    <!-- canvas for signature input -->
                     <canvas id="signatureCanvas" width="400" height="200"></canvas>
+                    <!-- button to clear signature -->
                     <button type="button" class="btn btn-secondary mt-2" id="clearSignature">Clear Signature</button>
                 </div>
                 <div class="modal-footer">
+                    <!-- button to save signature -->
                     <button type="button" class="btn btn-primary" id="saveSignature">Save Signature</button>
+                    <!-- button to close modal -->
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK and Main JavaScript Code -->
+
 <script type="module">
+    // import necessary functions from Firebase modules for app initialization and storage operations
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
+    // configuration object for Firebase that contains project-specific settings
     const firebaseConfig = {
-        apiKey: "AIzaSyDl97Q7B4KpfKBEL6yuxercRBSp-6eKUmA",
-        authDomain: "flask-cors.firebaseapp.com",
-        projectId: "flask-cors",
-        storageBucket: "flask-cors.appspot.com",
-        messagingSenderId: "921038822101",
-        appId: "1:921038822101:web:2e9cecd15b1791a4de205c",
-        measurementId: "G-LT2CY3W7N9"
+        apiKey: "AIzaSyDl97Q7B4KpfKBEL6yuxercRBSp-6eKUmA", // API key for accessing Firebase services
+        authDomain: "flask-cors.firebaseapp.com", // domain for Firebase Authentication
+        projectId: "flask-cors", // unique identifier for the Firebase project
+        storageBucket: "flask-cors.appspot.com", // storage bucket for storing files
+        messagingSenderId: "921038822101", // sender ID for Firebase Cloud Messaging
+        appId: "1:921038822101:web:2e9cecd15b1791a4de205c", // application ID for Firebase app
+        measurementId: "G-LT2CY3W7N9" // measurement ID for Google Analytics
     };
+
+    // initialize Firebase app using the provided configuration
     const app = initializeApp(firebaseConfig);
+    // get a reference to Firebase Storage
     const storage = getStorage(app);
 
     let signaturePad;
 
+    // event listener to ensure DOM is fully loaded before executing JavaScript
     document.addEventListener('DOMContentLoaded', function () {
+        // get reference to the canvas element used for signature capture
         const canvas = document.getElementById('signatureCanvas');
+        // initialize SignaturePad on the canvas to handle drawing and clearing signatures
         signaturePad = new SignaturePad(canvas);
 
+        // event listener to clear the signature pad when the clear button is clicked
         document.getElementById('clearSignature').addEventListener('click', function () {
-            signaturePad.clear();
+            signaturePad.clear(); // clears the current signature from the pad
         });
 
+        // event listener to save the signature when the save button is clicked
         document.getElementById('saveSignature').addEventListener('click', function () {
+            // check if the signature pad is empty (i.e., no signature has been drawn)
             if (signaturePad.isEmpty()) {
-                alert("Please provide a signature.");
-                return;
+                alert("Please provide a signature."); // prompt user if no signature is present
+                return; // exit the function if no signature is provided
             }
 
+            // convert the drawn signature to a data URL (base64 encoded image)
             const dataUrl = signaturePad.toDataURL();
+            // get reference to the hidden input field that stores the signature data URL
             const dataUrlField = document.getElementById('ownerSignature');
             if (dataUrlField) {
-                dataUrlField.value = dataUrl; // Store data URL in the form field
+                // if the hidden input field already exists, update its value with the new data URL
+                dataUrlField.value = dataUrl; 
             } else {
-                // Create a hidden input field to store the signature data URL
+                // if the hidden input field does not exist, create a new one
                 const input = document.createElement('input');
-                input.type = 'hidden';
-                input.id = 'ownerSignature';
-                input.name = 'ownerSignature';
-                input.value = dataUrl;
+                input.type = 'hidden'; // set input type to 'hidden' so it is not visible
+                input.id = 'ownerSignature'; // set ID to match the existing ID in the form
+                input.name = 'ownerSignature'; // set name for form data submission
+                input.value = dataUrl; // set value to the data URL of the signature
+                // append the new hidden input field to the form
                 document.getElementById('receiptForm').appendChild(input);
             }
 
+            // hide the modal containing the signature pad after saving the signature
             $('#signatureModal').modal('hide');
         });
 
+        // event listener to handle form submission and generate the receipt
         document.getElementById('receiptForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // prevent the default form submission behavior
 
+            // show the loading indicator while processing the form
             document.getElementById('loader').classList.remove('d-none');
 
+            // import jsPDF from the global window object
             const { jsPDF } = window.jspdf;
+            // create a new jsPDF document in landscape orientation with A4 size
             const doc = new jsPDF('landscape', 'mm', 'a4');
 
+            // retrieve values from form fields
             const tenantName = document.getElementById('tenantName').value;
             const receiptDate = document.getElementById('receiptDate').value;
             const amountPaid = document.getElementById('amountPaid').value;
-            const ownerSignature = document.getElementById('ownerSignature')?.value;
+            const ownerSignature = document.getElementById('ownerSignature')?.value; // optional chaining to handle absence
             const paymentMode = document.getElementById('paymentMode').value;
 
-            const pageWidth = 297; // A4 landscape width in mm
-            const pageHeight = 210; // A4 landscape height in mm
+            // define page dimensions for the PDF document
+            const pageWidth = 297; // width of A4 landscape page in mm
+            const pageHeight = 210; // height of A4 landscape page in mm
 
+            // define content to be included in the receipt
             const lines = [
                 `Tenant Name: ${tenantName}`,
                 `Receipt Date: ${receiptDate}`,
                 `Amount Paid: ${amountPaid}`,
                 `Payment Mode: ${paymentMode}`
             ];
-            const lineHeight = 10;
-            const headerHeight = 20;
-            const additionalTextHeight = 20;
-            const footerHeight = 20;
+            const lineHeight = 10; // height of each line of text
+            const headerHeight = 20; // height reserved for the header
+            const additionalTextHeight = 20; // height for additional text (e.g., thank you message)
+            const footerHeight = 20; // height reserved for the footer
 
+            // calculate the total height required for content on the page
             const totalContentHeight = (lines.length * lineHeight) + headerHeight + additionalTextHeight + footerHeight;
-
+            // calculate the starting Y coordinate to center the content vertically
             const startY = (pageHeight - totalContentHeight) / 2;
 
+            // draw a border around the PDF page
             doc.setLineWidth(1);
             doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
 
+            // set font size and style for the receipt title
             doc.setFontSize(24);
             doc.setFont("Montserrat", "bold");
+            // add the title "RECEIPT" to the PDF, centered horizontally and vertically in the header area
             doc.text("RECEIPT", pageWidth / 2, startY + headerHeight / 2, { align: "center" });
 
+            // set font size and style for the receipt details
             doc.setFontSize(14);
             doc.setFont("Montserrat", "normal");
+            // loop through each line of content and add it to the PDF
             lines.forEach((line, index) => {
                 doc.text(line, pageWidth / 2, startY + headerHeight + (index * lineHeight) + (lineHeight / 2), { align: "center" });
             });
 
+            // if an owner's signature is provided, add it to the PDF
             if (ownerSignature) {
+                // get the signature image data
                 const imgData = ownerSignature;
-                const signatureX = pageWidth - 60; // Adjust the x-coordinate here
+                const signatureX = pageWidth - 60; // x-coordinate for the signature image
                 const signatureY = pageHeight - 50; // y-coordinate for the signature image
-                doc.addImage(imgData, 'PNG', signatureX, signatureY, 50, 30); // Adjust position and size as needed
+                // add the signature image to the PDF
+                doc.addImage(imgData, 'PNG', signatureX, signatureY, 50, 30); // adjust position and size as needed
 
-                const textX = signatureX + 25; // Adjust this value to move the text to the right
-                const textY = signatureY + 35; // Adjust this value to move the text down
+                // define position for the signature label text
+                const textX = signatureX + 25; // x-coordinate for the signature label text
+                const textY = signatureY + 35; // y-coordinate for the signature label text
+                // set font size and style for the signature label text
                 doc.setFontSize(12);
                 doc.setFont("Montserrat", "normal");
+                // add the label "Owner's Signature" next to the signature image
                 doc.text("Owner's Signature", textX, textY, { align: "center" });
             }
 
+            // set font size and style for the thank you message
             doc.setFontSize(12);
             doc.setFont("Montserrat", "italic");
+            // add a thank you message to the PDF, centered horizontally
             doc.text("Thank you for your payment!", pageWidth / 2, startY + headerHeight + (lines.length * lineHeight) + additionalTextHeight / 2, { align: "center" });
 
+            // set font size and style for the footer text
             doc.setFontSize(10);
             doc.setFont("Montserrat", "italic");
 
+            // get the current date and time, formatted for the footer
             const currentDate = new Date();
             const formattedDate = currentDate.toLocaleDateString('en-US', {
                 year: 'numeric', month: '2-digit', day: '2-digit'
@@ -277,48 +362,67 @@
             const formattedTime = currentDate.toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit'
             });
-            const footerMargin = 15;
+            const footerMargin = 15; // margin from the bottom of the page for footer text
+            // add the receipt generation date and time to the PDF footer
             doc.text(`Receipt Generated: ${formattedDate} ${formattedTime}`, pageWidth / 2, pageHeight - footerMargin, { align: "center" });
 
+            // generate the PDF as a Blob object
             const pdfBlob = doc.output('blob');
 
+            // create a reference for the PDF file in Firebase Storage
             const pdfRef = ref(storage, `receipts/receipt-${Date.now()}.pdf`);
+            // upload the PDF Blob to Firebase Storage
             uploadBytes(pdfRef, pdfBlob).then((snapshot) => {
+                // get the download URL for the uploaded PDF
                 getDownloadURL(snapshot.ref).then((url) => {
                     console.log('File available at', url);
 
+                    // create a QR code with the download URL
                     const qr = new QRious({
-                        element: document.getElementById('qrCode'),
-                        size: 150,
-                        value: url
+                        element: document.getElementById('qrCode'), // reference to the QR code canvas element
+                        size: 150, // size of the QR code
+                        value: url // URL to be encoded in the QR code
                     });
 
-                    document.getElementById('displayTenantName').textContent = tenantName;
-                    document.getElementById('displayReceiptDate').textContent = receiptDate;
-                    document.getElementById('displayAmountPaid').textContent = amountPaid;
-                    document.getElementById('displayOwnerSignature').textContent = "See PDF for signature";
-                    document.getElementById('displayPaymentMode').textContent = paymentMode;
+                    // update the receipt preview with form data
+                    document.getElementById('displayTenantName').textContent = tenantName; // display tenant name
+                    document.getElementById('displayReceiptDate').textContent = receiptDate; // display receipt date
+                    document.getElementById('displayAmountPaid').textContent = amountPaid; // display amount paid
+                    document.getElementById('displayOwnerSignature').textContent = "See PDF for signature"; // placeholder for signature
+                    document.getElementById('displayPaymentMode').textContent = paymentMode; // display payment mode
+
+                    // remove the 'd-none' class to show the receipt preview
                     document.getElementById('receiptPreview').classList.remove('d-none');
 
+                    // add event listener to the download button to open the PDF URL in a new tab
                     document.getElementById('downloadPdf').addEventListener('click', function() {
-                        window.open(url, '_blank');
+                        window.open(url, '_blank'); // open PDF in a new tab
                     });
 
+                    // hide the loading indicator
                     document.getElementById('loader').classList.add('d-none');
 
                 }).catch((error) => {
+                    // log any errors that occur while getting the download URL
                     console.error("Error getting download URL:", error);
+                    // hide the loading indicator
                     document.getElementById('loader').classList.add('d-none');
                 });
             }).catch((error) => {
+                // log any errors that occur while uploading the PDF
                 console.error("Error uploading PDF:", error);
+                // hide the loading indicator
                 document.getElementById('loader').classList.add('d-none');
             });
         });
     });
 </script>
+
+<!-- Include jQuery library for Bootstrap's JavaScript components -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Include Popper.js for Bootstrap's tooltips and popovers -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<!-- Include Bootstrap's JavaScript components -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
