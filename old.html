@@ -1,402 +1,101 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- specify the character encoding for the document -->
     <meta charset="UTF-8">
+
+    <!-- set the viewport to ensure the page is responsive on different devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- set the title of the page -->
     <title>Tenant Receipt System</title>
+
+    <!-- link to the Bootstrap CSS for styling -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- link to the custom stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- set the favicon for the page -->
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABj0lEQVR4nO2VwUrDQBCG9yWqb9DePSkIveyAh14Ec9jVi2QOPof2abx7KkJt00KCVqF489CTJLlZe3YlpVuWGLBNmo2t88MPYQd25tuZ3TBGIpH+nzw/9IZByM213ui95gXh7bqxRP3H6Njzow6zpUEQqcSeH3aHQdwc+rEz8KNYr68cC+Jm8q3XrQNs2owAVhR1IKARKiZ9gs3Tu5WcdeJZcWZLWwcAF1d7ILHNhfvMBc7KusRc4Awkjrhwb5Kcmyleug4XOAWJSrssADByzHOe41nh4kHil7mxCbDu2Pw2QpDKM8+dFyJpYfrkKwBQXODHiXNZy3H62M7a0NYIgQkh8XptAC7wJb1R/eBw7rIA6ov9MyBGOTrgfv4VAC5wmgPgZyt1grINGbkJACo228QIEYCsuANPb0dWDATAqAOKRkjSJcbK336gH5ncsR/Z/YOnJpPJ0p1uv3Dstd5Sap8vPW60ygMwi9AuGlNG8doEsLMd6HT7qVnuFY6NGxbvwNa/QkAAaK8DJBKJbYW+AX7aIYn4KzT3AAAAAElFTkSuQmCC">
+
+    <!-- include the jsPDF library for generating PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- include the QRious library for generating QR codes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <!-- include the Signature Pad library for capturing signatures -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.3.4/signature_pad.min.js"></script>
     <style>
-        :root {
-            --primary: #FF6B6B;
-            --secondary: #4ECDC4;
-            --accent: #FFE66D;
-            --dark: #292F36;
-            --light: #F7FFF7;
-        }
+    /* set the height of the html and body to 100% and remove default margin */
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
-        }
+    /* add padding to the bottom of the container to accommodate for fixed footer */
+    .container {
+        padding-bottom: 60px;
+    }
 
-        .container {
-            padding-bottom: 70px;
-            max-width: 900px;
-        }
+    /* style for the footer: fixed at the bottom of the page */
+    footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #343a40; /* dark background color */
+        color: #ffffff; /* white text color */
+        text-align: center;
+        padding: 10px 0;
+    }
 
-        h2, h4 {
-            font-family: 'Pacifico', cursive;
-            color: var(--primary);
-            text-shadow: 1px 1px 0px var(--dark);
-        }
+    /* style for the loader overlay: covers the entire page */
+    #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8); /* semi-transparent white background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000; /* ensure it appears above other content */
+        display: none; /* hidden by default */
+    }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        }
+    /* style for modal content: relative positioning */
+    .modal-content {
+        position: relative;
+    }
 
-        .card-body {
-            padding: 2rem;
-        }
+    /* style for modal body: relative positioning */
+    .modal-body {
+        position: relative;
+    }
 
-        .form-control {
-            border-radius: 25px;
-            border: 2px solid var(--secondary);
-            padding: 10px 15px;
-            font-size: 1rem;
-            background-color: rgba(255, 255, 255, 0.9);
-            transition: all 0.3s ease;
-        }
+    /* style for the signature canvas: border around it */
+    #signatureCanvas {
+        border: 1px solid #ddd; /* light gray border */
+    }
 
-        .form-control:focus {
-            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
-            border-color: var(--primary);
-        }
+    /* style for the signature label: centered text with margin */
+    .signature-label {
+        margin-bottom: 15px;
+        text-align: center;
+    }
 
-        .form-group label {
-            color: var(--dark);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn {
-            border-radius: 25px;
-            padding: 10px 20px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
-            z-index: 1;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .btn-primary:hover {
-            background-color: #ff5252;
-            border-color: #ff5252;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            border-color: var(--secondary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-        }
-
-        .btn-secondary:hover {
-            background-color: #3db5ac;
-            border-color: #3db5ac;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.6);
-        }
-
-        .btn-success {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            color: var(--dark);
-            box-shadow: 0 4px 15px rgba(255, 230, 109, 0.4);
-        }
-
-        .btn-success:hover {
-            background-color: #ffd84a;
-            border-color: #ffd84a;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 230, 109, 0.6);
-        }
-
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            text-align: center;
-            padding: 2px -2px;
-            font-size: 0.9rem;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        footer a {
-            color: var(--accent);
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        footer a:hover {
-            color: white;
-            text-decoration: none;
-        }
-
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            display: none;
-        }
-
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            color: var(--primary);
-        }
-
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        }
-
-        .modal-header, .modal-footer {
-            border: none;
-            padding: 1.5rem;
-        }
-
-        .modal-header {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-
-        .modal-title {
-            color: white;
-            font-family: 'Pacifico', cursive;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
-        }
-
-        .close {
-            color: white;
-            text-shadow: none;
-            opacity: 0.8;
-        }
-
-        .close:hover {
-            color: white;
-            opacity: 1;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        #signatureCanvas {
-            border: 3px dashed var(--secondary);
-            border-radius: 10px;
-            background-color: white;
-            width: 100%;
-            height: 200px;
-            cursor: crosshair;
-            touch-action: none;
-        }
-
-        .signature-label {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            color: var(--dark);
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        #receiptPreview {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        #receiptPreview::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(78, 205, 196, 0.05),
-                rgba(78, 205, 196, 0.05) 10px,
-                rgba(255, 107, 107, 0.05) 10px,
-                rgba(255, 107, 107, 0.05) 20px
-            );
-            border-radius: 15px;
-            z-index: -1;
-        }
-
-        #receiptContent {
-            border: 2px solid var(--accent);
-            border-radius: 10px;
-            background-color: white;
-            padding: 2rem;
-            position: relative;
-        }
-
-        #receiptContent::after {
-            content: '';
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background-image: radial-gradient(var(--accent) 20%, transparent 20%),
-                            radial-gradient(var(--accent) 20%, transparent 20%);
-            background-size: 10px 10px;
-            background-position: 0 0, 5px 5px;
-            bottom: -10px;
-            right: -10px;
-            z-index: -1;
-            opacity: 0.5;
-            border-radius: 50%;
-        }
-
-        #receiptContent p {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--dark);
-            border-bottom: 1px dashed var(--secondary);
-            padding-bottom: 0.5rem;
-        }
-
-        #receiptContent p strong {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        #qrCode {
-            display: block;
-            margin: 1.5rem auto;
-            padding: 10px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .card-body {
-                padding: 1.5rem;
-            }
-
-            h2 {
-                font-size: 1.8rem;
-            }
-        }
-
-        /* Retro decorative elements */
-        .retro-circle {
-            position: fixed;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: var(--accent);
-            opacity: 0.1;
-            z-index: -1;
-        }
-
-        .retro-circle-1 {
-            top: -150px;
-            left: -150px;
-        }
-
-        .retro-circle-2 {
-            bottom: -100px;
-            right: -50px;
-        }
-
-        .retro-line {
-            position: fixed;
-            width: 100%;
-            height: 10px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            opacity: 0.2;
-            z-index: -1;
-        }
-
-        .retro-line-1 {
-            top: 20%;
-            transform: rotate(-5deg);
-        }
-
-        .retro-line-2 {
-            top: 60%;
-            transform: rotate(3deg);
-        }
-
-        /* Zig-zag border for the card */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background: linear-gradient(135deg, var(--light) 25%, transparent 25%) -5px 0,
-                        linear-gradient(225deg, var(--light) 25%, transparent 25%) -5px 0,
-                        linear-gradient(315deg, var(--light) 25%, transparent 25%),
-                        linear-gradient(45deg, var(--light) 25%, transparent 25%);
-            background-size: 10px 10px;
-            background-color: var(--primary);
-        }
     </style>
 </head>
 <body>
-    <!-- Retro decorative elements -->
-    <div class="retro-circle retro-circle-1"></div>
-    <div class="retro-circle retro-circle-2"></div>
-    <div class="retro-line retro-line-1"></div>
-    <div class="retro-line retro-line-2"></div>
-
     <!-- container to hold the form and receipt preview -->
     <div class="container mt-5">
         <div class="card">
             <div class="card-body">
                 <!-- heading for the receipt system -->
-                <h2 class="text-center mb-4">Tenant Receipt System</h2>
+                <h2 class="text-center">Tenant Receipt System</h2>
                 <!-- form to input receipt details -->
                 <form id="receiptForm">
                     <!-- input field for tenant's name -->
@@ -437,9 +136,9 @@
                 </form>
 
                 <!-- section to preview the receipt -->
-                <div id="receiptPreview" class="mt-5 d-none">
-                    <h4 class="text-center mb-4">Receipt Preview</h4>
-                    <div id="receiptContent" class="p-4">
+                <div id="receiptPreview" class="mt-4 d-none">
+                    <h4 class="text-center">Receipt Preview</h4>
+                    <div id="receiptContent" class="border p-3">
                         <!-- displaying tenant's name -->
                         <p><strong>Tenant Name:</strong> <span id="displayTenantName"></span></p>
                         <!-- displaying receipt date -->
@@ -451,10 +150,10 @@
                         <!-- displaying payment mode -->
                         <p><strong>Payment Mode:</strong> <span id="displayPaymentMode"></span></p>
                         <!-- canvas for QR code -->
-                        <canvas id="qrCode" class="d-block mx-auto my-4"></canvas>
+                        <canvas id="qrCode" class="d-block mx-auto my-3"></canvas>
                     </div>
                     <!-- button to download receipt as PDF -->
-                    <button id="downloadPdf" class="btn btn-success btn-block mt-4">Download PDF</button>
+                    <button id="downloadPdf" class="btn btn-success btn-block">Download PDF</button>
                 </div>
             </div>
         </div>
@@ -469,7 +168,7 @@
 
     <!-- footer with contact information -->
     <footer>
-        <p>For any inquiries, please contact me at <a href="mailto:kurosen930@gmail.com">kurosen930@gmail.com</a></p>
+        <p>For any inquiries, please contact us at <a href="mailto:ufraansiddiqui30@gmail.com" class="text-white">ufraansiddiqui30@gmail.com</a></p>
     </footer>
 
     <!-- modal for adding owner's signature -->
@@ -490,7 +189,7 @@
                     <!-- canvas for signature input -->
                     <canvas id="signatureCanvas" width="400" height="200"></canvas>
                     <!-- button to clear signature -->
-                    <button type="button" class="btn btn-secondary mt-3" id="clearSignature">Clear Signature</button>
+                    <button type="button" class="btn btn-secondary mt-2" id="clearSignature">Clear Signature</button>
                 </div>
                 <div class="modal-footer">
                     <!-- button to save signature -->
@@ -502,13 +201,7 @@
         </div>
     </div>
 
-    <!-- Include jQuery library for Bootstrap's JavaScript components -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <!-- Include Popper.js for Bootstrap's tooltips and popovers -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <!-- Include Bootstrap's JavaScript components -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+
 <script type="module">
     // import necessary functions from Firebase modules for app initialization and storage operations
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -724,4 +417,13 @@
         });
     });
 </script>
+
+<!-- Include jQuery library for Bootstrap's JavaScript components -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Include Popper.js for Bootstrap's tooltips and popovers -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<!-- Include Bootstrap's JavaScript components -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
 </html>
+
